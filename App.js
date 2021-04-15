@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 // Componentes de react  native
-import {Text, View, StyleSheet, Image, Button, Alert, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Image, Button, Alert, TouchableOpacity, Platform} from 'react-native';
 import * as ImagePicker from 'expo-image-picker'; 
 // import { WebView } from 'react-native-webview';
+import * as Sharing from 'expo-sharing';
 
 const App = () => {
 
@@ -22,19 +23,38 @@ const App = () => {
       return;
     }
 
-    setSelectedImage({localUri: pickerImg.uri})
+    if(Platform.OS === 'web'){
+      
+    }else{
+      setSelectedImage({localUri: pickerImg.uri})
+    }
 
+  }
+
+
+  const openShareModal = async () => {
+    if(!(await Sharing.isAvailableAsync())){
+      alert(`Sharing, is not available on your device`)
+      return;
+    }
+
+    await Sharing.shareAsync(selectImage.localUri);
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Aprendiendo React Native Basico</Text>
-      <Image 
+      <TouchableOpacity 
+        onPress = {openImagePickerAsync}
+      >
+        <Image 
         source={{uri: selectImage !== null 
                       ? selectImage.localUri
                       :'https://cdn.vox-cdn.com/thumbor/H3kPpG-J5Z3rMpc6h60zxyJAdoQ=/1400x1050/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/19396981/shutterstock_1413240503.jpg'}}
         style={styles.img} 
       />
+      </TouchableOpacity>
+      
       {/* // <WebView source={{ uri: 'URL DE LA PAGINA' }} /> */}
 
       {/* <Button 
@@ -43,13 +63,18 @@ const App = () => {
         color="#007AFF"
       /> */}
 
-      <TouchableOpacity
+      {
+        selectImage ?
+        <TouchableOpacity
         // onPress= {()=> { Alert.alert('Hola me presionaron') }}
-        onPress = {openImagePickerAsync}
+        onPress= {openShareModal}
         style={styles.btn}
-      >
-        <Text style={styles.btntext}>Presioname!</Text>
-      </TouchableOpacity>
+        >
+        <Text style={styles.btntext}>Share this Image!</Text>
+        </TouchableOpacity>
+        :
+        <View/>
+      }
 
     </View>
   )
